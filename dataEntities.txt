@@ -1,0 +1,36 @@
+NEO4J:
+
+InterventionNode:
+	audio_id,
+	language,
+	gender,
+	speaker_id,
+	accent
+
+
+AudioNode:
+	audio_id,
+	path,
+	sampling_rate
+
+
+TextNode:
+	audio_id,
+	raw_text,
+	normalized_text,
+	is_gold_transcript,
+
+
+Relazione non orientata InterventionNode-AudioNode
+Relazione non orientata InterventionNode-TextNode
+
+
+Milvus:
+
+CollectionIntervention:
+	audio_id,
+	array_audio,
+	array_text
+
+
+tramite espressione regolare estraiamo il timestamp ed aggiungiamo data e ora ad InterventionNode
