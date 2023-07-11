@@ -97,6 +97,7 @@ txt_model.eval()
 i = 0
 time_st = time.time()
 for item in dataset:
+    #Query
     print(i)
     get_audio_embedding(item['audio']['array'], model_audio)
     get_text_embedding(item['normalized_text'], device, txt_tokenizer, txt_model)
