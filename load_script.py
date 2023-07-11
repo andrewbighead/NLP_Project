@@ -3,6 +3,8 @@ from datasets import load_dataset, concatenate_datasets
 from speechbrain.pretrained import EncoderClassifier
 from transformers import BertTokenizer, BertModel
 import numpy as np
+import re
+from datetime import datetime
 import time
 
 
@@ -88,16 +90,29 @@ def get_text_embedding(text, dev, tokenizer, model):
     return get_sentence_embedding_from_hidden_states(hidden_states)
 
 
-dataset = extract_dataset()
-model_audio = set_audio_model()
+def create_timestamp_from_audio_id(audio_id):
+    pattern = r"(\d{8}-\d{2}:\d{2}:\d{2})"
+    match = re.search(pattern, audio_id)
+    if match:
+        extracted_date = match.group(1)
+        final_timestamp = datetime.strptime(extracted_date, "%Y%m%d-%H:%M:%S")
+        return final_timestamp
+    else:
+        return None
 
+
+dataset = extract_dataset()
+
+model_audio = set_audio_model()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 txt_tokenizer, txt_model = set_text_model(device)
 txt_model.eval()
 i = 0
 time_st = time.time()
+
+
 for item in dataset:
-    #Query
+    # Query e processing della data
     print(i)
     get_audio_embedding(item['audio']['array'], model_audio)
     get_text_embedding(item['normalized_text'], device, txt_tokenizer, txt_model)
