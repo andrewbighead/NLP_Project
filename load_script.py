@@ -6,6 +6,14 @@ import numpy as np
 import re
 from datetime import datetime
 import time
+import json
+from neo4j import GraphDatabase
+from pymilvus import (
+    connections,
+    utility,
+    FieldSchema, CollectionSchema, DataType,
+    Collection,
+)
 
 
 def extract_dataset():
@@ -61,7 +69,6 @@ def get_hidden_states(dev, model, tokens_tensor, segments_tensors):
 
 
 def get_sentence_embedding_from_hidden_states(hidden_states):
-
     """
         Per ogni layer (13, 12 di BERT + 1 di input) ho un tensore 1 x n°tokens x 768
         dove 1 è il batch (una frase) e 768 sono le hidden_units (la trasformazione dell'input in quel layer)
@@ -101,16 +108,83 @@ def create_timestamp_from_audio_id(audio_id):
         return None
 
 
+def neo4j_connect(uri, username, password):
+    try:
+        # Connessione al database Neo4j
+        driver = GraphDatabase.driver(uri, auth=(username, password))
+
+        # Restituisci l'oggetto di connessione
+        return driver
+
+    except Exception as e:
+        print(f"Errore durante la connessione a Neo4j: {e}")
+        return None
+
+
+def neo4j_disconnect(driver):
+    driver.close()
+
+
+def get_neo4j_parameter(json_path):
+    try:
+        # Carica i parametri di connessione da un file JSON
+        with open(json_path) as json_file:
+            params = json.load(json_file)
+            return params['uri'], params['username'], params['password']
+
+    except Exception as e:
+        print(f"Errore durante il recupero dei parametri di connessione Neo4j: {e}")
+        return None
+
+
+def get_milvus_parameter(json_path):
+    try:
+        # Carica i parametri di connessione da un file JSON
+        with open(json_path) as json_file:
+            params = json.load(json_file)
+            return params['host'], params['port']
+
+    except Exception as e:
+        print(f"Errore durante il recupero dei parametri di connessione Neo4j: {e}")
+        return None
+
+
+def milvus_connect(host, port):
+    try:
+        # Connessione al database Milvus
+        connections.connect("default", host, port)
+
+        # Restituisci l'oggetto di connessione
+        return True
+
+    except Exception as e:
+        print(f"Errore durante la connessione a Milvus: {e}")
+        return False
+
+
+def milvus_disconnect():
+    connections.disconnect("default")
+
+
+h, p = get_milvus_parameter("connect_milvus.json")
+connected = milvus_connect(h, p)
+if connected:
+    print("OK")
+    milvus_disconnect()
+    print("DISCONNESSO")
+else:
+    print("ERROR")
+
+'''
 dataset = extract_dataset()
 
 model_audio = set_audio_model()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 txt_tokenizer, txt_model = set_text_model(device)
 txt_model.eval()
+
 i = 0
 time_st = time.time()
-
-
 for item in dataset:
     # Query e processing della data
     print(i)
@@ -118,3 +192,5 @@ for item in dataset:
     get_text_embedding(item['normalized_text'], device, txt_tokenizer, txt_model)
     i = i + 1
 print(f'Tot: {time.time()-time_st}')
+
+'''
