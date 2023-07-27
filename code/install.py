@@ -55,18 +55,25 @@ def main():
         audio_embeddings.append({"intervention_id": intervention_id, "audio_embedding": processed_embedding_audio})
         processed_embedding_text = tp.get_text_embedding(item['normalized_text'], device, txt_tokenizer, txt_model)
         text_embeddings.append({"intervention_id": intervention_id, "text_embedding": processed_embedding_text})
-        # tp.create_timestamp_from_audio_id(item['audio_id']) per inserire in Neo4J
     f.my_print(f'Estrazione Completata')
 
-    # Suddivisione delle liste in 12 parti (per inserire in milvus gli embeddings di 2000 in 2000)
-    audio_embedding_parts = np.array_split(audio_embeddings, 12)
-    text_embedding_parts = np.array_split(text_embeddings, 12)
+    # ------------------------------------- Insert in Neo4j -------------------------------------
+    for i, item in enumerate(tqdm(dataset, desc="Dati inseriti in Neo4J:", total=len(dataset))):
+        n4m.insert_sample_nodes(n4j_conn, item)
+    f.my_print('Dati inseriti correttamente')
+
+    # Split delle liste di embedding per gestire meglio le risorse HW durante l'inserimento in milvus
+    embedding_split = 25
+    audio_embedding_parts = np.array_split(audio_embeddings, embedding_split)
+    text_embedding_parts = np.array_split(text_embeddings, embedding_split)
     list_of_arrays_audio_embedding_parts = [arr.tolist() for arr in audio_embedding_parts]
     list_of_arrays_text_embedding_parts = [arr.tolist() for arr in text_embedding_parts]
+
+    # ------------------------------------- Insert in Milvus -------------------------------------
+
     f.my_print(f'Inizio inserimento dati in Milvus')
     progress_bar_insert = tqdm(total=len(dataset), desc='Dati inseriti in Milvus:')
-    for i in range(0, 12):
-        # ------------------------------------- Insert in Milvus -------------------------------------
+    for i in range(0, embedding_split):
         mm.insert_data_in_collection(list_of_arrays_audio_embedding_parts[i], audio_collection)
         mm.insert_data_in_collection(list_of_arrays_text_embedding_parts[i], text_collection)
         progress_bar_insert.update(len(list_of_arrays_text_embedding_parts[i]))
@@ -75,14 +82,14 @@ def main():
     f.my_print(f'Creazione Indici per le collezioni')
     mm.create_indexes_for_collections(audio_collection, text_collection)
     f.my_print(f'Indici per le collezioni creati correttamente')
-    # ------------------------------------- Insert in Neo4j -------------------------------------
 
     # ------------------------------------- Disconnect from Databases -------------------------------------
     mm.milvus_disconnect()
     n4m.neo4j_disconnect(n4j_conn)
 
     end_time = time.time() - start_time
-    f.my_print(f'Tempo totale: {end_time}')
+    f.my_print(f'Tempo totale: {end_time/60} minuti.')
+    exit(0)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 def get_format(length):
-    return "\n=== {:"+str(length)+"} ===\n"
+    return "\n<=== {:"+str(length)+"} ===>\n"
 
 
 def get_latency_format():

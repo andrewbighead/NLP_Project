@@ -66,6 +66,7 @@ def create_timestamp_from_audio_id(audio_id):
     if match:
         extracted_date = match.group(1)
         final_timestamp = datetime.strptime(extracted_date, "%Y%m%d-%H:%M:%S")
-        return final_timestamp
+        formatted_timestamp = final_timestamp.strftime("%Y-%m-%dT%H:%M:%S")
+        return formatted_timestamp
     else:
         return None
