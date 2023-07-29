@@ -60,3 +60,8 @@ def insert_sample_nodes(driver, sample):
             timestamp=timestamp,
         ).consume()
         return session
+
+
+def drop_all_nodes(driver):
+    with driver.session() as session:
+        session.run("""MATCH (n) DETACH DELETE n""").consume()

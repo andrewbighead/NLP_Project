@@ -89,7 +89,9 @@ def main():
 
     end_time = time.time() - start_time
     f.my_print(f'Tempo totale: {end_time/60} minuti.')
-    exit(0)
+
+    f.my_print(f'Operazioni completate con successo, attendere la terminazione dei processi. Questo potrebbe '
+               f'richiedere qualche altro secondo.')
 
 
 if __name__ == "__main__":
