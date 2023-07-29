@@ -2,6 +2,19 @@ import json
 from neo4j import GraphDatabase
 import formatter as f
 import text_processing as tp
+from py2neo import Graph
+
+
+def py2neo_connect(uri, username, password):
+    try:
+        f.my_print(f'Tentativo di connessione al database {uri}:')
+        graph = Graph(uri, auth=(username, password))
+        f.my_print(f'Connesso al database {uri}!')
+        return graph
+
+    except Exception as e:
+        f.my_print(f"Errore durante la connessione a Neo4j {e}")
+        return None
 
 
 def neo4j_connect(uri, username, password):
