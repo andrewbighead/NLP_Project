@@ -11,6 +11,7 @@ import formatter as f
 import milvus_manager as mm
 import neo4j_manager as n4m
 import text_processing as tp
+import query_tests as qt
 
 
 def main():
@@ -32,6 +33,7 @@ def main():
     # ------------------------------------- Dataset -------------------------------------
     f.my_print("Estrazione del Dataset VoxPopuli-it")
     dataset = dp.extract_dataset()
+    dataset = dataset.shard(num_shards=510, index=0)
     f.my_print("Dataset Estratto correttamente")
 
     # ------------------------------------- Modelli -------------------------------------
@@ -69,7 +71,7 @@ def main():
     list_of_arrays_audio_embedding_parts = [arr.tolist() for arr in audio_embedding_parts]
     list_of_arrays_text_embedding_parts = [arr.tolist() for arr in text_embedding_parts]
 
-    # ------------------------------------- Insert in Milvus -------------------------------------
+    # # ------------------------------------- Insert in Milvus -------------------------------------
 
     f.my_print(f'Inizio inserimento dati in Milvus')
     progress_bar_insert = tqdm(total=len(dataset), desc='Dati inseriti in Milvus:')
@@ -82,6 +84,24 @@ def main():
     f.my_print(f'Creazione Indici per le collezioni')
     mm.create_indexes_for_collections(audio_collection, text_collection)
     f.my_print(f'Indici per le collezioni creati correttamente')
+
+    # ------------------------------------- Query on Milvus --------------------------------------
+    # racist_text = "io non sono razzista ma lo sanno tutti che gli immigrati rubano il nostro lavoro sbarcando qui"
+    # meat_text = "etichetta della carne"
+    # sample_embedding = tp.get_text_embedding(meat_text, device, txt_tokenizer, txt_model)
+    # qt.similarity_query(meat_text, sample_embedding, text_collection)
+
+    # ------------------------------------- Mixed Query: gender + similarity --------------------------------------
+    # feminist_text = "le donne devono denunciare gli sfruttamenti"
+    # immigration_text = "fermiamo l'immigrazione"
+    # job_text = "lavoro e imprese e cose varie solo per allungare il testo ma vai via buffone ciao sono io come stai ao dai roma forza napoli"
+    # sample_embedding = tp.get_text_embedding(job_text, device, txt_tokenizer, txt_model)
+    # qt.mixed_query(job_text, sample_embedding, text_collection, {'gender': 'male'})
+
+    # ------------------------------------- Delete all nodes from both databases --------------------------------------
+    # n4m.drop_all_nodes(n4j_conn)
+    # mm.drop_collection(audio_collection)
+    # mm.drop_collection(text_collection)
 
     # ------------------------------------- Disconnect from Databases -------------------------------------
     mm.milvus_disconnect()
