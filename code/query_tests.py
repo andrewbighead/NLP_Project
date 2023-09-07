@@ -86,7 +86,7 @@ def get_text_from_neo4j(intervention_id):
         f.my_print(f"Errore durante il recupero dei nodi {e}")
         return None
 
-    return result.data()[0]['t.raw_text']
+    return result.data()[0]['t.raw_text'] if result.data() is not None else []
 
 
 
