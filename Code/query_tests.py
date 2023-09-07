@@ -20,10 +20,10 @@ def mixed_query(sample_text, sample_embedding, text_collection, properties):
                 print(satisfying_intervention['text'])
 
 
-def similarity_query(sample_text, sample_embedding, text_collection):
+def similarity_query(sample_text, sample_embedding, text_collection, graph):
     retrieved_intervention_ids = milvus_similarity_query(sample_text, sample_embedding, text_collection, limit=3)
     for retrieved_intervention in retrieved_intervention_ids:
-        retrieved_text = get_text_from_neo4j(retrieved_intervention)
+        retrieved_text = get_text_from_neo4j(graph, retrieved_intervention)
         print("Retrieved: " + retrieved_text)
 
 
@@ -55,7 +55,7 @@ def milvus_similarity_query(sample_text, sample_embedding, text_collection, limi
 
 
 def query_neo4j_by_properties(properties):
-    uri, username, password = n4m.get_neo4j_parameter('../connect_neo4j.json')
+    uri, username, password = n4m.get_neo4j_parameter('../config/connect_neo4j.json')
     graph = n4m.py2neo_connect(uri, username, password)
 
     props_string = ", ".join([f"i.{key} = ${key}" for key in properties.keys()])
@@ -74,20 +74,14 @@ def query_neo4j_by_properties(properties):
     return retrieved_interventions
 
 
-def get_text_from_neo4j(intervention_id):
-    uri, username, password = n4m.get_neo4j_parameter('../connect_neo4j.json')
-    graph = n4m.py2neo_connect(uri, username, password)
+def get_text_from_neo4j(graph, intervention_id):
 
-    query = f"MATCH(t:TextNode) WHERE t.audio_id = '{intervention_id}' RETURN t.raw_text"
+    query = f"MATCH(t:TextNode) WHERE t.audio_id = '{intervention_id}' RETURN t.raw_text as text"
 
-    try:
-        result = graph.run(query)
-    except Exception as e:
-        f.my_print(f"Errore durante il recupero dei nodi {e}")
-        return None
+    result = graph.run(query)
 
-    return result.data()[0]['t.raw_text'] if result.data() is not None else []
-
-
-
-
+    text_r = ""
+    for record in result:
+        text_r = record['text']
+        print(text_r)
+    return text_r

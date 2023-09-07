@@ -4,8 +4,8 @@ from pymilvus import (
     FieldSchema, CollectionSchema, DataType,
     Collection,
 )
-import json
 import formatter as f
+import json
 
 
 def get_milvus_parameter(json_path):
@@ -13,6 +13,7 @@ def get_milvus_parameter(json_path):
         f.my_print(f"Recupero dei parametri di connessione Milvus")
         with open(json_path) as json_file:
             params = json.load(json_file)
+            print(params)
             return params['host'], params['port']
 
     except Exception as e:
@@ -79,3 +80,7 @@ def insert_data_in_collection(data, collection):
 def drop_collection(collection):
     utility.drop_collection(collection.name)
     f.my_print(f"collection {collection.name} eliminata.")
+
+
+def get_collection(collection_name):
+    return Collection(collection_name)

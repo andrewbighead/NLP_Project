@@ -1,8 +1,8 @@
-import numpy as np
 from transformers import BertTokenizer, BertModel
 import re
 from datetime import datetime
 import torch
+import numpy as np
 
 
 def set_text_model(dev):

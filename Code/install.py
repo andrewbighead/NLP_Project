@@ -1,9 +1,8 @@
 import time
 import warnings
-
-import numpy as np
 import torch
 from tqdm import tqdm
+import numpy as np
 
 import audio_processing as ap
 import dataset_process as dp
@@ -11,7 +10,6 @@ import formatter as f
 import milvus_manager as mm
 import neo4j_manager as n4m
 import text_processing as tp
-import query_tests as qt
 
 
 def main():
@@ -20,20 +18,19 @@ def main():
     start_time = time.time()
 
     # ------------------------------------- Milvus -------------------------------------
-    milvus_host, milvus_port = mm.get_milvus_parameter('../connect_milvus.json')
+    milvus_host, milvus_port = mm.get_milvus_parameter('../config/connect_milvus.json')
     mm.milvus_connect(milvus_host, milvus_port)
     f.my_print("Creazione delle collezioni Milvus")
     audio_schema, text_schema = mm.create_schemas()
     audio_collection, text_collection = mm.create_collections(audio_schema, text_schema)
 
     # ------------------------------------- Neo4j -------------------------------------
-    uri, user, pwd = n4m.get_neo4j_parameter('../connect_neo4j.json')
-    n4j_conn = n4m.neo4j_connect(uri, user, pwd)
+    uri, user, pwd = n4m.get_neo4j_parameter('../config/connect_neo4j.json')
+    n4j_conn = n4m.py2neo_connect(uri, user, pwd)
 
     # ------------------------------------- Dataset -------------------------------------
     f.my_print("Estrazione del Dataset VoxPopuli-it")
     dataset = dp.extract_dataset()
-    dataset = dataset.shard(num_shards=510, index=0)
     f.my_print("Dataset Estratto correttamente")
 
     # ------------------------------------- Modelli -------------------------------------
@@ -84,28 +81,7 @@ def main():
     f.my_print(f'Creazione Indici per le collezioni')
     mm.create_indexes_for_collections(audio_collection, text_collection)
     f.my_print(f'Indici per le collezioni creati correttamente')
-
-    # ------------------------------------- Query on Milvus --------------------------------------
-    # racist_text = "io non sono razzista ma lo sanno tutti che gli immigrati rubano il nostro lavoro sbarcando qui"
-    # meat_text = "etichetta della carne"
-    # sample_embedding = tp.get_text_embedding(meat_text, device, txt_tokenizer, txt_model)
-    # qt.similarity_query(meat_text, sample_embedding, text_collection)
-
-    # ------------------------------------- Mixed Query: gender + similarity --------------------------------------
-    # feminist_text = "le donne devono denunciare gli sfruttamenti"
-    # immigration_text = "fermiamo l'immigrazione"
-    # job_text = "lavoro e imprese e cose varie solo per allungare il testo ma vai via buffone ciao sono io come stai ao dai roma forza napoli"
-    # sample_embedding = tp.get_text_embedding(job_text, device, txt_tokenizer, txt_model)
-    # qt.mixed_query(job_text, sample_embedding, text_collection, {'gender': 'male'})
-
-    # ------------------------------------- Delete all nodes from both databases --------------------------------------
-    # n4m.drop_all_nodes(n4j_conn)
-    # mm.drop_collection(audio_collection)
-    # mm.drop_collection(text_collection)
-
-    # ------------------------------------- Disconnect from Databases -------------------------------------
     mm.milvus_disconnect()
-    n4m.neo4j_disconnect(n4j_conn)
 
     end_time = time.time() - start_time
     f.my_print(f'Tempo totale: {end_time/60} minuti.')
