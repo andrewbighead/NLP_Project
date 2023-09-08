@@ -13,7 +13,6 @@ def get_milvus_parameter(json_path):
         f.my_print(f"Recupero dei parametri di connessione Milvus")
         with open(json_path) as json_file:
             params = json.load(json_file)
-            print(params)
             return params['host'], params['port']
 
     except Exception as e:

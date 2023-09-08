@@ -37,9 +37,16 @@ audio_collection.load()
 
 
 # ------------------------------------- Mixed Query: gender + similarity --------------------------------------
-feminist_text = "le donne devono denunciare gli sfruttamenti rispetto delle donne le donne le donne le donne"
+# feminist_text = "le donne devono denunciare gli sfruttamenti rispetto delle donne le donne le donne le donne"
 # immigration_text = "fermiamo l'immigrazione salvini sei una persona ignobile" job_text = "lavoro e imprese e cose
 # varie solo per allungare il testo ma vai via buffone ciao sono io come stai ao dai roma forza napoli"
-sample_embedding = tp.get_text_embedding(feminist_text, device, txt_tokenizer, txt_model)
-qt.mixed_query(graph, feminist_text, sample_embedding, text_collection, {'gender': 'male'})
+# sample_embedding = tp.get_text_embedding(feminist_text, device, txt_tokenizer, txt_model)
+# qt.mixed_query(graph, feminist_text, sample_embedding, text_collection, {'gender': 'male'})
+
+# ------------------------------------- Mixed Query: gender + timestamps --------------------------------------
+feminist_text = "le donne devono denunciare gli sfruttamenti rispetto delle donne le donne le donne le donne"
+qt.get_id_and_text_by_properties_between_timestamps_neo4j(graph,
+                                                          {'gender': 'male'},
+                                                          "2013-05-20T18:11:55",
+                                                          "2015-05-20T18:11:55")
 

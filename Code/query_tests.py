@@ -4,7 +4,7 @@ import neo4j_manager as n4m
 
 def mixed_query(graph, sample_text, sample_embedding, text_collection, properties):
     # Get intervention from Neo4J that satisfy the properties and save them ids
-    retrieved_interventions_satisfying_properties = query_neo4j_by_properties(graph, properties)
+    retrieved_interventions_satisfying_properties = get_id_and_text_by_properties_neo4j(graph, properties)
     ids_filter = []
     for intervention in retrieved_interventions_satisfying_properties:
         ids_filter.append(intervention['id'])
@@ -79,10 +79,11 @@ def get_text_by_intervention_id_neo4j(graph, intervention_id):
         return ''
 
 
-def query_neo4j_by_properties(graph, properties):
-
+def get_id_and_text_by_properties_neo4j(graph, properties):
     props_string = " AND ".join([f"i.{key} = ${key}" for key in properties.keys()])
-    query = f"MATCH(i:InterventionNode)-[:REFERS_TO]-(t:TextNode) WHERE {props_string} RETURN i.audio_id, t.raw_text"
+    query = (f"MATCH(i:InterventionNode)-[:REFERS_TO]-(t:TextNode) "
+             f"WHERE {props_string} "
+             f"RETURN i.audio_id, t.raw_text")
 
     try:
         result = graph.run(query, **properties)
@@ -93,4 +94,33 @@ def query_neo4j_by_properties(graph, properties):
     retrieved_interventions = []
     for intervention in result.data():
         retrieved_interventions.append({'id': intervention['i.audio_id'], 'text': intervention['t.raw_text']})
+    return retrieved_interventions
+
+
+def get_id_and_text_by_properties_between_timestamps_neo4j(graph, properties, start_date, end_date):
+
+    props_string = " AND ".join([f"i.{key} = ${key}" for key in properties.keys()])
+
+    properties["start_date"] = start_date
+    properties["end_date"] = end_date
+
+    timestamp = f" AND datetime(i.timestamp) >= datetime($start_date) AND datetime(i.timestamp) <= datetime($end_date) "
+
+    query = (f"MATCH(i:InterventionNode)-[:REFERS_TO]-(t:TextNode) "
+             f"WHERE {props_string}{timestamp}"
+             f"RETURN i.audio_id, t.raw_text "
+             f"ORDER BY i.timestamp")
+
+    f.my_print(query)
+
+    try:
+        result = graph.run(query, **properties)
+    except Exception as e:
+        f.my_print(f"Errore durante il recupero dei nodi {e}")
+        return None
+
+    retrieved_interventions = []
+    for intervention in result.data():
+        retrieved_interventions.append({'id': intervention['i.audio_id'], 'text': intervention['t.raw_text']})
+    f.my_print(f'{retrieved_interventions}')
     return retrieved_interventions
