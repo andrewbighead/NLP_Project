@@ -15,7 +15,5 @@ pip install transformers
 pip install neo4j
 pip install pymilvus
 pip install py2neo
-pip install fastapi
-pip install "uvicorn[standard]"
 cd NLP_Project/code
 python3 install.py
