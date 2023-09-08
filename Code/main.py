@@ -24,22 +24,22 @@ audio_collection.load()
 
 
 # ------------------------------------- Query on Milvus --------------------------------------
-racist_text = "io non sono razzista ma lo sanno tutti che gli immigrati rubano il nostro lavoro sbarcando qui"
-meat_text = ("Egregio Presidente e stimati membri dell'assemblea, la scelta di imporre l'obbligo di etichettare la "
-             "carne trasformata contenuta negli alimenti di uso comune costituisce un risultato significativo "
-             "nell'assicurare una tracciabilità superiore, prevenire frodi alimentari con conseguenze gravi per i "
-             "cittadini, e agevolare le aziende alimentari nella selezione di fornitori e prodotti di qualità "
-             "superiore.")
+# racist_text = "io non sono razzista ma lo sanno tutti che gli immigrati rubano il nostro lavoro sbarcando qui"
+# meat_text = ("Egregio Presidente e stimati membri dell'assemblea, la scelta di imporre l'obbligo di etichettare la "
+#             "carne trasformata contenuta negli alimenti di uso comune costituisce un risultato significativo "
+#             "nell'assicurare una tracciabilità superiore, prevenire frodi alimentari con conseguenze gravi per i "
+#             "cittadini, e agevolare le aziende alimentari nella selezione di fornitori e prodotti di qualità "
+#             "superiore.")
 
 
-sample_embedding = tp.get_text_embedding(meat_text, device, txt_tokenizer, txt_model)
-qt.similarity_query(meat_text, sample_embedding, text_collection, graph)
+# sample_embedding = tp.get_text_embedding(meat_text, device, txt_tokenizer, txt_model)
+# qt.similarity_query(meat_text, sample_embedding, text_collection, graph)
 
 
 # ------------------------------------- Mixed Query: gender + similarity --------------------------------------
-    # feminist_text = "le donne devono denunciare gli sfruttamenti"
-    # immigration_text = "fermiamo l'immigrazione"
-    # job_text = "lavoro e imprese e cose varie solo per allungare il testo ma vai via buffone ciao sono io come stai ao dai roma forza napoli"
-    # sample_embedding = tp.get_text_embedding(job_text, device, txt_tokenizer, txt_model)
-    # qt.mixed_query(job_text, sample_embedding, text_collection, {'gender': 'male'})
+feminist_text = "le donne devono denunciare gli sfruttamenti rispetto delle donne le donne le donne le donne"
+# immigration_text = "fermiamo l'immigrazione salvini sei una persona ignobile" job_text = "lavoro e imprese e cose
+# varie solo per allungare il testo ma vai via buffone ciao sono io come stai ao dai roma forza napoli"
+sample_embedding = tp.get_text_embedding(feminist_text, device, txt_tokenizer, txt_model)
+qt.mixed_query(graph, feminist_text, sample_embedding, text_collection, {'gender': 'male'})
 
