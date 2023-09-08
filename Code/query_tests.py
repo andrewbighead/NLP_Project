@@ -21,14 +21,16 @@ def mixed_query(sample_text, sample_embedding, text_collection, properties):
 
 
 def similarity_query(sample_text, sample_embedding, text_collection, graph):
-    retrieved_intervention_ids = milvus_similarity_query(sample_text, sample_embedding, text_collection, limit=3)
+    retrieved_intervention_ids = milvus_similarity_query(sample_text, sample_embedding, text_collection, limit=15)
+    i = 0
     for retrieved_intervention in retrieved_intervention_ids:
+        i = i + 1
         retrieved_text = get_text_from_neo4j(graph, retrieved_intervention)
-        print("Retrieved: " + retrieved_text)
+        f.my_print(f"{i} {retrieved_text}")
 
 
 def milvus_similarity_query(sample_text, sample_embedding, text_collection, limit=16384, ids_filter=None):
-    print(f.my_print("Start searching based on vector similarity"))
+    f.my_print("Start searching based on vector similarity")
     search_params = {
         "metric_type": "L2",
         "params": {"nprobe": 10},
@@ -36,22 +38,46 @@ def milvus_similarity_query(sample_text, sample_embedding, text_collection, limi
 
     if ids_filter is not None:
         expr = "intervention_id in ["
-        ids_as_string_of_list = ", ".join([f"'{id}'" for id in ids_filter])
-        expr = expr + ids_as_string_of_list + "]"
+        ids_as_list_of_strings = ", ".join([f"'{intervention_id}'" for intervention_id in ids_filter])
+        expr = expr + ids_as_list_of_strings + "]"
     else:
         expr = None
 
     result = text_collection.search(
-        [sample_embedding], "text_embedding", search_params, expr=expr, limit=limit, output_fields=["intervention_id"])
+        [sample_embedding],
+        "text_embedding",
+        search_params,
+        expr=expr,
+        limit=limit,
+        output_fields=["intervention_id"]
+    )
 
-    print("Sample queried: " + sample_text)
+    f.my_print("Sample queried: " + sample_text)
     retrieved_intervention_ids = []
     for hits in result:
         for hit in hits:
-            print(f"hit: {hit}, intervention_id field: {hit.entity.get('intervention_id')}")
+            hit_dict = {
+                "hit": {
+                    "intervention_id": hit.entity.get('intervention_id'),
+                    "distance": hit.distance
+                }
+            }
+            f.my_print(f'{hit_dict}')
+            # f.my_print(f"hit: {hit}, intervention_id field: {hit.entity.get('intervention_id')}")
             retrieved_intervention_ids.append(hit.entity.get('intervention_id'))
-
     return retrieved_intervention_ids
+
+
+def get_text_from_neo4j(graph, intervention_id):
+    query = f"MATCH (t:TextNode) WHERE t.audio_id = '{intervention_id}' RETURN t.raw_text"
+
+    result = graph.run(query)
+
+    text_r = ''
+    try:
+        return result.data()[0]['t.raw_text']
+    except IndexError as e:
+        return ''
 
 
 def query_neo4j_by_properties(properties):
@@ -72,16 +98,3 @@ def query_neo4j_by_properties(properties):
         retrieved_interventions.append({'id': intervention['i.audio_id'], 'text': intervention['t.raw_text']})
 
     return retrieved_interventions
-
-
-def get_text_from_neo4j(graph, intervention_id):
-
-    query = f"MATCH(t:TextNode) WHERE t.audio_id = '{intervention_id}' RETURN t.raw_text as text"
-
-    result = graph.run(query)
-
-    text_r = ""
-    for record in result:
-        text_r = record['text']
-        print(text_r)
-    return text_r

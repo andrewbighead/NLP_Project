@@ -25,7 +25,13 @@ audio_collection.load()
 
 # ------------------------------------- Query on Milvus --------------------------------------
 racist_text = "io non sono razzista ma lo sanno tutti che gli immigrati rubano il nostro lavoro sbarcando qui"
-meat_text = "etichetta della carne"
+meat_text = ("Egregio Presidente e stimati membri dell'assemblea, la scelta di imporre l'obbligo di etichettare la "
+             "carne trasformata contenuta negli alimenti di uso comune costituisce un risultato significativo "
+             "nell'assicurare una tracciabilità superiore, prevenire frodi alimentari con conseguenze gravi per i "
+             "cittadini, e agevolare le aziende alimentari nella selezione di fornitori e prodotti di qualità "
+             "superiore.")
+
+
 sample_embedding = tp.get_text_embedding(meat_text, device, txt_tokenizer, txt_model)
 qt.similarity_query(meat_text, sample_embedding, text_collection, graph)
 
