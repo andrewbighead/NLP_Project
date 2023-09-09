@@ -30,8 +30,9 @@ audio_collection.load()
 #             "nell'assicurare una tracciabilità superiore, prevenire frodi alimentari con conseguenze gravi per i "
 #             "cittadini, e agevolare le aziende alimentari nella selezione di fornitori e prodotti di qualità "
 #             "superiore.")
-# sample_embedding = tp.get_text_embedding(my_text, device, txt_tokenizer, txt_model)
-# qt.similarity_query(my_text, sample_embedding, text_collection, graph)
+# egypt_text = "è drammatica la situazione in egitto"
+# sample_embedding = tp.get_text_embedding(egypt_text, device, text_tokenizer, text_model)
+# qt.similarity_query(text_collection, graph, egypt_text, sample_embedding, sample_type="text")
 
 
 # ------------------------------------- Query on Milvus: audio similarity --------------------------------------
@@ -41,26 +42,31 @@ audio_collection.load()
 # audio_path = ("/home/one/.cache/huggingface/datasets/downloads/extracted"
 #             "/b7a3c66e6026620cda6b8044f8e8ddcec67315d2007a24718ec3e3bc533b4020/test_part_0/20180528-0900-PLENARY-20"
 #             "-it_20180528-20:28:03_10.wav")
+#
+# wave, _ = torchaudio.load("../audio_tests/20130520-0900-PLENARY-11-it_20130520-17:18:58_1.wav")
+# audio_arr = wave.numpy()
+# audio_arr = wave.numpy()
+# embedding = ap.get_audio_embedding(audio_arr, audio_model)
+#
+# for i in range(len(embedding)):
+#     print(f'{embedding[i]},')
 
-wave, _ = torchaudio.load("../audio_tests/20130520-0900-PLENARY-11-it_20130520-17:18:58_1.wav")
-audio_arr = wave.numpy()
-audio_arr = wave.numpy()
-embedding = ap.get_audio_embedding(audio_arr, audio_model)
+# ------------------------------------- Query on Neo4J: properties  --------------------------------------
+qt.properties_query(graph, {
+                                'gender': 'male',
+                                'timestamp_start': '2010-05-20T18:11:55',
+                                'timestamp_end': '2015-05-20T18:11:55'
+})
 
-for i in range(len(embedding)):
-    print(f'{embedding[i]},')
-
-
-# ------------------------------------- Mixed Query: gender + similarity --------------------------------------
-# feminist_text = "le donne devono denunciare gli sfruttamenti rispetto delle donne le donne le donne le donne"
-# immigration_text = "fermiamo l'immigrazione salvini sei una persona ignobile" job_text = "lavoro e imprese e cose
-# varie solo per allungare il testo ma vai via buffone ciao sono io come stai ao dai roma forza napoli"
-# sample_embedding = tp.get_text_embedding(feminist_text, device, txt_tokenizer, txt_model)
-# qt.mixed_query(graph, feminist_text, sample_embedding, text_collection, {'gender': 'male'})
-
-# ------------------------------------- Mixed Query: gender + timestamps --------------------------------------
-# feminist_text = "le donne devono denunciare gli sfruttamenti rispetto delle donne le donne le donne le donne"
-# qt.get_id_and_text_by_properties_between_timestamps_neo4j(graph,
-#                                                          {'gender': 'male'},
-#                                                          "2013-05-20T18:11:55",
-#                                                          "2015-05-20T18:11:55")
+# ------------------------------------- Mixed Query: properties + similarity --------------------------------------
+feminist_text = "le donne devono denunciare gli sfruttamenti rispetto delle donne le donne le donne le donne"
+immigration_text = "fermiamo l'immigrazione salvini sei una persona ignobile"
+job_text = "lavoro e imprese e cose varie solo per allungare il testo ma vai via buffone ciao sono io come stai ao dai roma forza napoli"
+meat_text = "etichettatura della carne"
+sample_embedding = tp.get_text_embedding(meat_text, device, text_tokenizer, text_model)
+qt.mixed_query(text_collection, graph, meat_text, sample_embedding, {
+                                                                        'gender': 'female',
+                                                                        'timestamp_start': '2015-05-20T18:11:55',
+                                                                        'timestamp_end': '2015-05-20T18:11:55'
+                                                                    },
+                                                                    sample_type="text")

@@ -2,7 +2,7 @@ import formatter as f
 import neo4j_manager as n4m
 
 
-def mixed_query(graph, sample_text, sample_embedding, text_collection, properties):
+def mixed_query(collection, graph, sample_text, sample_embedding, properties, sample_type):
     # Get intervention from Neo4J that satisfy the properties and save them ids
     retrieved_interventions_satisfying_properties = get_id_and_text_by_properties_neo4j(graph, properties)
     ids_filter = []
@@ -11,9 +11,10 @@ def mixed_query(graph, sample_text, sample_embedding, text_collection, propertie
 
     # From these interventions, get the most similar from Milvus
     retrieved_similar_intervention_ids = milvus_similarity_query(
-        sample_text, sample_embedding, text_collection, ids_filter=ids_filter)
+        collection, sample_embedding, sample_type, ids_filter=ids_filter)
 
     # Get the text from the most similar interventions
+    f.my_print("Sample queried: " + sample_text)
     i = 0
     for similar_intervention_id in retrieved_similar_intervention_ids:
         for satisfying_intervention in retrieved_interventions_satisfying_properties:
@@ -22,16 +23,27 @@ def mixed_query(graph, sample_text, sample_embedding, text_collection, propertie
                 f.my_print(f"{i} - {satisfying_intervention['text']}")
 
 
-def similarity_query(sample_text, sample_embedding, text_collection, graph):
-    retrieved_intervention_ids = milvus_similarity_query(sample_text, sample_embedding, text_collection, limit=15)
+def similarity_query(collection, graph, sample_text, sample_embedding, sample_type):
+    retrieved_intervention_ids = milvus_similarity_query(collection, sample_embedding, sample_type, limit=15)
+
+    f.my_print("Sample queried: " + sample_text)
     i = 0
     for retrieved_intervention in retrieved_intervention_ids:
         i = i + 1
-        retrieved_text = get_text_by_intervention_id_neo4j(graph, retrieved_intervention)
+        retrieved_text = get_text_by_intervention_id_from_neo4j(graph, retrieved_intervention)
         f.my_print(f"{i} {retrieved_text}")
 
 
-def milvus_similarity_query(sample_text, sample_embedding, text_collection, limit=16384, ids_filter=None):
+def properties_query(graph, properties):
+    retrieved_interventions = get_id_and_text_by_properties_neo4j(graph, properties)
+    
+    i = 0
+    for intervention in retrieved_interventions:
+        i += 1
+        f.my_print(f"{i} {intervention['text']}")
+
+
+def milvus_similarity_query(collection, sample_embedding, sample_type, limit=16384, ids_filter=None):
     f.my_print("Start searching based on vector similarity")
     search_params = {
         "metric_type": "L2",
@@ -45,16 +57,15 @@ def milvus_similarity_query(sample_text, sample_embedding, text_collection, limi
     else:
         expr = None
 
-    result = text_collection.search(
+    result = collection.search(
         [sample_embedding],
-        "text_embedding",
+        f"{sample_type}_embedding",
         search_params,
         expr=expr,
         limit=limit,
         output_fields=["intervention_id"]
     )
 
-    f.my_print("Sample queried: " + sample_text)
     retrieved_intervention_ids = []
     for hits in result:
         for hit in hits:
@@ -69,10 +80,9 @@ def milvus_similarity_query(sample_text, sample_embedding, text_collection, limi
     return retrieved_intervention_ids
 
 
-def get_text_by_intervention_id_neo4j(graph, intervention_id):
+def get_text_by_intervention_id_from_neo4j(graph, intervention_id):
     query = f"MATCH (t:TextNode) WHERE t.audio_id = '{intervention_id}' RETURN t.raw_text"
     result = graph.run(query)
-    text_r = ''
     try:
         return result.data()[0]['t.raw_text']
     except IndexError as e:
@@ -80,11 +90,15 @@ def get_text_by_intervention_id_neo4j(graph, intervention_id):
 
 
 def get_id_and_text_by_properties_neo4j(graph, properties):
-    props_string = " AND ".join([f"i.{key} = ${key}" for key in properties.keys()])
+    props_string = " AND ".join([f"i.{key} = ${key}" for key in properties.keys() if "timestamp" not in key])
+    if "timestamp_start" in properties.keys():
+        props_string = props_string + f" AND datetime(i.timestamp) >= datetime($timestamp_start)"
+    if "timestamp_end" in properties.keys():
+        props_string = props_string + f" AND datetime(i.timestamp) <= datetime($timestamp_end)"
+
     query = (f"MATCH(i:InterventionNode)-[:REFERS_TO]-(t:TextNode) "
              f"WHERE {props_string} "
              f"RETURN i.audio_id, t.raw_text")
-
     try:
         result = graph.run(query, **properties)
     except Exception as e:
