@@ -23,29 +23,32 @@ text_collection.load()
 audio_collection = mm.get_collection("audio_interventions")
 audio_collection.load()
 
-# ------------------------------------- Query on Milvus --------------------------------------
+# ------------------------------------- Query on Milvus: text similarity --------------------------------------
 # racist_text = "io non sono razzista ma lo sanno tutti che gli immigrati rubano il nostro lavoro sbarcando qui"
 # meat_text = ("Egregio Presidente e stimati membri dell'assemblea, la scelta di imporre l'obbligo di etichettare la "
 #             "carne trasformata contenuta negli alimenti di uso comune costituisce un risultato significativo "
 #             "nell'assicurare una tracciabilità superiore, prevenire frodi alimentari con conseguenze gravi per i "
 #             "cittadini, e agevolare le aziende alimentari nella selezione di fornitori e prodotti di qualità "
 #             "superiore.")
-
-# my_text = ("Infatti, se il costo della vita è diverso, la stessa cifra concessa come aiuto può avere un impatto "
-#           "concreto molto diverso, e non vogliamo generare ulteriori distorsioni nel mercato unico.")
-path = ("/home/one/.cache/huggingface/datasets/downloads/extracted"
-        "/b7a3c66e6026620cda6b8044f8e8ddcec67315d2007a24718ec3e3bc533b4020/test_part_0/20180528-0900-PLENARY-20"
-        "-it_20180528-20:28:03_10.wav")
-
-wave, _ = torchaudio.load("../prove_audio/prova.wav")
-audio_arr = wave.numpy()
-emb = ap.get_audio_embedding(audio_arr, audio_model)
-
-for i in range(len(emb)):
-    print(f'{emb[i]},')
-
 # sample_embedding = tp.get_text_embedding(my_text, device, txt_tokenizer, txt_model)
 # qt.similarity_query(my_text, sample_embedding, text_collection, graph)
+
+
+# ------------------------------------- Query on Milvus: audio similarity --------------------------------------
+# audio_text = ("Infatti, se il costo della vita è diverso, la stessa cifra concessa come aiuto può avere un impatto "
+#           "concreto molto diverso, e non vogliamo generare ulteriori distorsioni nel mercato unico.")
+
+# audio_path = ("/home/one/.cache/huggingface/datasets/downloads/extracted"
+#             "/b7a3c66e6026620cda6b8044f8e8ddcec67315d2007a24718ec3e3bc533b4020/test_part_0/20180528-0900-PLENARY-20"
+#             "-it_20180528-20:28:03_10.wav")
+
+wave, _ = torchaudio.load("../audio_tests/20130520-0900-PLENARY-11-it_20130520-17:18:58_1.wav")
+audio_arr = wave.numpy()
+audio_arr = wave.numpy()
+embedding = ap.get_audio_embedding(audio_arr, audio_model)
+
+for i in range(len(embedding)):
+    print(f'{embedding[i]},')
 
 
 # ------------------------------------- Mixed Query: gender + similarity --------------------------------------
