@@ -40,11 +40,11 @@ audio_text = ("Infatti, se il costo della vita è diverso, la stessa cifra conce
               "concreto molto diverso, e non vogliamo generare ulteriori distorsioni nel mercato unico.")
 
 # audio_path = "../audio_tests/sample.wav" # sample del dataset
-audio_path = "../audio_tests/voce_andrea.wav"
+audio_path = "../audio_tests/rec_mario.wav"
 wave, _ = torchaudio.load(audio_path)
 audio_arr = wave.numpy()
 audio_arr = audio_arr[0]
-embedding = ap.get_audio_embedding(audio_arr, audio_model)[0]
+embedding = ap.get_audio_embedding(audio_arr, audio_model)
 
 qt.similarity_query(audio_collection, graph, audio_text, embedding, sample_type="audio")
 
