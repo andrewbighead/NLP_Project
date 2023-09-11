@@ -15,7 +15,7 @@ uri, user, pwd = n4m.get_neo4j_parameter('../config/connect_neo4j.json')
 graph = n4m.py2neo_connect(uri, user, pwd)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-txt_tokenizer, txt_model = tp.set_text_model(device)
+text_tokenizer, text_model = tp.set_text_model(device)
 audio_model = ap.set_audio_model()
 
 text_collection = mm.get_collection("text_interventions")
@@ -36,37 +36,34 @@ audio_collection.load()
 
 
 # ------------------------------------- Query on Milvus: audio similarity --------------------------------------
-# audio_text = ("Infatti, se il costo della vita è diverso, la stessa cifra concessa come aiuto può avere un impatto "
-#           "concreto molto diverso, e non vogliamo generare ulteriori distorsioni nel mercato unico.")
+audio_text = ("Infatti, se il costo della vita è diverso, la stessa cifra concessa come aiuto può avere un impatto "
+              "concreto molto diverso, e non vogliamo generare ulteriori distorsioni nel mercato unico.")
 
-# audio_path = ("/home/one/.cache/huggingface/datasets/downloads/extracted"
-#             "/b7a3c66e6026620cda6b8044f8e8ddcec67315d2007a24718ec3e3bc533b4020/test_part_0/20180528-0900-PLENARY-20"
-#             "-it_20180528-20:28:03_10.wav")
-#
-# wave, _ = torchaudio.load("../audio_tests/20130520-0900-PLENARY-11-it_20130520-17:18:58_1.wav")
-# audio_arr = wave.numpy()
-# audio_arr = wave.numpy()
-# embedding = ap.get_audio_embedding(audio_arr, audio_model)
-#
-# for i in range(len(embedding)):
-#     print(f'{embedding[i]},')
+# audio_path = "../audio_tests/sample.wav" # sample del dataset
+audio_path = "../audio_tests/voce_andrea.wav"
+wave, _ = torchaudio.load(audio_path)
+audio_arr = wave.numpy()
+audio_arr = audio_arr[0]
+embedding = ap.get_audio_embedding(audio_arr, audio_model)[0]
+
+qt.similarity_query(audio_collection, graph, audio_text, embedding, sample_type="audio")
 
 # ------------------------------------- Query on Neo4J: properties  --------------------------------------
-qt.properties_query(graph, {
-                                'gender': 'male',
-                                'timestamp_start': '2010-05-20T18:11:55',
-                                'timestamp_end': '2015-05-20T18:11:55'
-})
+# qt.properties_query(graph, {
+#     'gender': 'male',
+#     'timestamp_start': '2010-05-20T18:11:55',
+#     'timestamp_end': '2015-05-20T18:11:55'
+# })
 
 # ------------------------------------- Mixed Query: properties + similarity --------------------------------------
-feminist_text = "le donne devono denunciare gli sfruttamenti rispetto delle donne le donne le donne le donne"
-immigration_text = "fermiamo l'immigrazione salvini sei una persona ignobile"
-job_text = "lavoro e imprese e cose varie solo per allungare il testo ma vai via buffone ciao sono io come stai ao dai roma forza napoli"
-meat_text = "etichettatura della carne"
-sample_embedding = tp.get_text_embedding(meat_text, device, text_tokenizer, text_model)
-qt.mixed_query(text_collection, graph, meat_text, sample_embedding, {
-                                                                        'gender': 'female',
-                                                                        'timestamp_start': '2015-05-20T18:11:55',
-                                                                        'timestamp_end': '2015-05-20T18:11:55'
-                                                                    },
-                                                                    sample_type="text")
+# feminist_text = "le donne devono denunciare gli sfruttamenti rispetto delle donne le donne le donne le donne"
+# immigration_text = "fermiamo l'immigrazione salvini sei una persona ignobile"
+# job_text = ("lavoro e imprese e cose varie solo per allungare il testo ma vai via buffone ciao sono io come stai ao "
+#             "dai roma forza napoli")
+# meat_text = "etichettatura della carne"
+# sample_embedding = tp.get_text_embedding(meat_text, device, text_tokenizer, text_model)
+# qt.mixed_query(text_collection, graph, meat_text, sample_embedding, {
+#     'gender': 'female',
+#     'timestamp_start': '2015-05-20T18:11:55',
+#     'timestamp_end': '2015-05-20T18:11:55'
+# }, sample_type="text")

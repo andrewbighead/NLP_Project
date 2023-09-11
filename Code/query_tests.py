@@ -36,7 +36,7 @@ def similarity_query(collection, graph, sample_text, sample_embedding, sample_ty
 
 def properties_query(graph, properties):
     retrieved_interventions = get_id_and_text_by_properties_neo4j(graph, properties)
-    
+
     i = 0
     for intervention in retrieved_interventions:
         i += 1
@@ -108,33 +108,4 @@ def get_id_and_text_by_properties_neo4j(graph, properties):
     retrieved_interventions = []
     for intervention in result.data():
         retrieved_interventions.append({'id': intervention['i.audio_id'], 'text': intervention['t.raw_text']})
-    return retrieved_interventions
-
-
-def get_id_and_text_by_properties_between_timestamps_neo4j(graph, properties, start_date, end_date):
-
-    props_string = " AND ".join([f"i.{key} = ${key}" for key in properties.keys()])
-
-    properties["start_date"] = start_date
-    properties["end_date"] = end_date
-
-    timestamp = f" AND datetime(i.timestamp) >= datetime($start_date) AND datetime(i.timestamp) <= datetime($end_date) "
-
-    query = (f"MATCH(i:InterventionNode)-[:REFERS_TO]-(t:TextNode) "
-             f"WHERE {props_string}{timestamp}"
-             f"RETURN i.audio_id, t.raw_text "
-             f"ORDER BY i.timestamp")
-
-    f.my_print(query)
-
-    try:
-        result = graph.run(query, **properties)
-    except Exception as e:
-        f.my_print(f"Errore durante il recupero dei nodi {e}")
-        return None
-
-    retrieved_interventions = []
-    for intervention in result.data():
-        retrieved_interventions.append({'id': intervention['i.audio_id'], 'text': intervention['t.raw_text']})
-    f.my_print(f'{retrieved_interventions}')
     return retrieved_interventions
