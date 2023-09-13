@@ -34,7 +34,7 @@ def insert_sample_nodes(graph, sample):
     sample['timestamp'] = timestamp
 
     intervention_node_dict = {
-        "audio_id": sample['audio_id'],
+        "intervention_id": sample['audio_id'],
         "language": sample['language'],
         "gender": sample['gender'],
         "speaker_id": sample['speaker_id'],
@@ -43,13 +43,11 @@ def insert_sample_nodes(graph, sample):
     }
 
     audio_node_dict = {
-        "audio_id": sample["audio_id"],
         "path": sample["audio"]["path"],
         "sampling_rate": sample["audio"]["sampling_rate"]
     }
 
     text_node_dict = {
-        "audio_id": sample["audio_id"],
         "raw_text": sample["raw_text"],
         "normalized_text": sample["normalized_text"],
         "is_gold_transcript": sample["is_gold_transcript"]

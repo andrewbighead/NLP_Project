@@ -35,6 +35,7 @@ def similarity_query(collection, graph, sample_text, sample_embedding, sample_ty
 
 
 def properties_query(graph, properties):
+    f.my_print("Retrieving interventions by properties")
     retrieved_interventions = get_id_and_text_by_properties_neo4j(graph, properties)
 
     i = 0
@@ -81,7 +82,8 @@ def milvus_similarity_query(collection, sample_embedding, sample_type, limit=163
 
 
 def get_text_by_intervention_id_from_neo4j(graph, intervention_id):
-    query = f"MATCH (t:TextNode) WHERE t.audio_id = '{intervention_id}' RETURN t.raw_text"
+    query = f"MATCH (t:TextNode)-[:REFERS_TO]->(i:InterventionNode) WHERE i.intervention_id = '{intervention_id}' " \
+            f"RETURN t.raw_text"
     result = graph.run(query)
     try:
         return result.data()[0]['t.raw_text']
@@ -96,9 +98,9 @@ def get_id_and_text_by_properties_neo4j(graph, properties):
     if "timestamp_end" in properties.keys():
         props_string = props_string + f" AND datetime(i.timestamp) <= datetime($timestamp_end)"
 
-    query = (f"MATCH(i:InterventionNode)-[:REFERS_TO]-(t:TextNode) "
+    query = (f"MATCH(i:InterventionNode)<-[:REFERS_TO]-(t:TextNode) "
              f"WHERE {props_string} "
-             f"RETURN i.audio_id, t.raw_text")
+             f"RETURN i.intervention_id, t.raw_text")
     try:
         result = graph.run(query, **properties)
     except Exception as e:
@@ -107,5 +109,5 @@ def get_id_and_text_by_properties_neo4j(graph, properties):
 
     retrieved_interventions = []
     for intervention in result.data():
-        retrieved_interventions.append({'id': intervention['i.audio_id'], 'text': intervention['t.raw_text']})
+        retrieved_interventions.append({'id': intervention['i.intervention_id'], 'text': intervention['t.raw_text']})
     return retrieved_interventions
