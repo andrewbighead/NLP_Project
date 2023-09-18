@@ -83,3 +83,40 @@ def drop_collection(collection):
 
 def get_collection(collection_name):
     return Collection(collection_name)
+
+
+def milvus_similarity_query(collection, sample_embedding, sample_type, limit=16384, ids_filter=None):
+    f.my_print("Start searching based on vector similarity")
+    search_params = {
+        "metric_type": "L2",
+        "params": {"nprobe": 10},
+    }
+
+    if ids_filter is not None:
+        expr = "intervention_id in ["
+        ids_as_list_of_strings = ", ".join([f"'{intervention_id}'" for intervention_id in ids_filter])
+        expr = expr + ids_as_list_of_strings + "]"
+    else:
+        expr = None
+
+    result = collection.search(
+        [sample_embedding],
+        f"{sample_type}_embedding",
+        search_params,
+        expr=expr,
+        limit=limit,
+        output_fields=["intervention_id"]
+    )
+
+    retrieved_intervention_ids = []
+    for hits in result:
+        for hit in hits:
+            hit_dict = {
+                "hit": {
+                    "intervention_id": hit.entity.get('intervention_id'),
+                    "distance": hit.distance
+                }
+            }
+            f.my_print(f'{hit_dict}')
+            retrieved_intervention_ids.append(hit.entity.get('intervention_id'))
+    return retrieved_intervention_ids

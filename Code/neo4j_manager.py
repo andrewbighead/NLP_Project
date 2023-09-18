@@ -75,3 +75,36 @@ def drop_all_nodes(driver):
     query = "MATCH (n) DETACH DELETE n"
     driver.run(query)
     return {"Message": "Database Deleted."}
+
+
+def get_text_by_intervention_id_from_neo4j(graph, intervention_id):
+    query = f"MATCH (t:TextNode)-[:REFERS_TO]->(i:InterventionNode) WHERE i.intervention_id = '{intervention_id}' " \
+            f"RETURN t.raw_text"
+    result = graph.run(query)
+    try:
+        return result.data()[0]['t.raw_text']
+    except IndexError as e:
+        return ''
+
+
+def get_id_and_text_by_properties_from_neo4j(graph, properties):
+    props_string = " AND ".join([f"i.{key} = ${key}" for key in properties.keys() if "timestamp" not in key])
+    if "timestamp_start" in properties.keys():
+        props_string = props_string + f" AND datetime(i.timestamp) >= datetime($timestamp_start)"
+    if "timestamp_end" in properties.keys():
+        props_string = props_string + f" AND datetime(i.timestamp) <= datetime($timestamp_end)"
+
+    query = (f"MATCH(i:InterventionNode)<-[:REFERS_TO]-(t:TextNode) "
+             f"WHERE {props_string} "
+             f"RETURN i.intervention_id, t.raw_text")
+    try:
+        result = graph.run(query, **properties)
+    except Exception as e:
+        f.my_print(f"Errore durante il recupero dei nodi {e}")
+        return None
+
+    retrieved_interventions = []
+    for intervention in result.data():
+        retrieved_interventions.append({'id': intervention['i.intervention_id'], 'text': intervention['t.raw_text']})
+    return retrieved_interventions
+

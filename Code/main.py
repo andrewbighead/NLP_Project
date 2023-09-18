@@ -1,5 +1,5 @@
 import torchaudio
-import query_tests as qt
+import query_manager as qt
 import numpy as np
 import audio_processing as ap
 import formatter as f
