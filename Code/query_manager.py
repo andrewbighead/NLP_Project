@@ -24,8 +24,8 @@ def mixed_query(collection, graph, sample_text, sample_embedding, properties, sa
                 f.my_print(f"{i} - {satisfying_intervention['text']}")
 
 
-def similarity_query(collection, graph, sample_text, sample_embedding, sample_type):
-    retrieved_intervention_ids = mm.milvus_similarity_query(collection, sample_embedding, sample_type, limit=150)
+def similarity_query(collection, graph, sample_text, sample_embedding, sample_type, limit=20):
+    retrieved_intervention_ids = mm.milvus_similarity_query(collection, sample_embedding, sample_type, limit)
 
     f.my_print("Sample queried: " + sample_text)
     i = 0
