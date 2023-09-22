@@ -61,14 +61,16 @@ def create_collections(audio_schema, text_schema):
     return audio_collection, text_collection
 
 
-def create_indexes_for_collections(audio_collection, text_collection):
-    index_structure = {
+def create_index_structure():
+    return {
         "index_type": "IVF_FLAT",
         "metric_type": "IP",
         "params": {"nlist": 128},
     }
-    audio_collection.create_index("audio_embedding", index_structure)
-    text_collection.create_index("text_embedding", index_structure)
+
+
+def create_index_collection(collection, vect_attribute, index_structure):
+    collection.create_index(vect_attribute, index_structure)
 
 
 def insert_data_in_collection(data, collection):
