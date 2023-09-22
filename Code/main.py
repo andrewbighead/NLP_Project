@@ -24,15 +24,15 @@ audio_collection = mm.get_collection("audio_interventions")
 audio_collection.load()
 
 # ------------------------------------- Query on Milvus: text similarity --------------------------------------
-# racist_text = "io non sono razzista ma lo sanno tutti che gli immigrati rubano il nostro lavoro sbarcando qui"
+racist_text = "io non sono razzista ma lo sanno tutti che gli immigrati rubano il nostro lavoro sbarcando qui"
 # meat_text = ("Egregio Presidente e stimati membri dell'assemblea, la scelta di imporre l'obbligo di etichettare la "
 #             "carne trasformata contenuta negli alimenti di uso comune costituisce un risultato significativo "
 #             "nell'assicurare una tracciabilità superiore, prevenire frodi alimentari con conseguenze gravi per i "
 #             "cittadini, e agevolare le aziende alimentari nella selezione di fornitori e prodotti di qualità "
 #             "superiore.")
 # egypt_text = "è drammatica la situazione in egitto"
-# sample_embedding = tp.get_text_embedding(egypt_text, device, text_tokenizer, text_model)
-# qt.similarity_query(text_collection, graph, egypt_text, sample_embedding, sample_type="text")
+sample_embedding = tp.get_text_embedding(racist_text, device, text_tokenizer, text_model)
+qt.similarity_query(text_collection, graph, racist_text, sample_embedding, sample_type="text")
 
 
 # ------------------------------------- Query on Milvus: audio similarity --------------------------------------
@@ -57,15 +57,15 @@ audio_collection.load()
 
 # ------------------------------------- Mixed Query: properties + similarity --------------------------------------
 # racist_text = "io non sono razzista ma lo sanno tutti che gli immigrati rubano il nostro lavoro sbarcando qui"
-meat_text = ("Egregio Presidente e stimati membri dell'assemblea, la scelta di imporre l'obbligo di etichettare la "
-             "carne trasformata contenuta negli alimenti di uso comune costituisce un risultato significativo "
-             "nell'assicurare una tracciabilità superiore, prevenire frodi alimentari con conseguenze gravi per i "
-             "cittadini, e agevolare le aziende alimentari nella selezione di fornitori e prodotti di qualità "
-             "superiore.")
-# egypt_text = "è drammatica la situazione in egitto"
-sample_embedding = tp.get_text_embedding(meat_text, device, text_tokenizer, text_model)
-qt.mixed_query(text_collection, graph, meat_text, sample_embedding, {
-    'gender': 'male',
-    'timestamp_start': '2010-05-20T18:11:55',
-    'timestamp_end': '2019-05-20T18:11:55'
-}, sample_type="text")
+# meat_text = ("Egregio Presidente e stimati membri dell'assemblea, la scelta di imporre l'obbligo di etichettare la "
+#              "carne trasformata contenuta negli alimenti di uso comune costituisce un risultato significativo "
+#              "nell'assicurare una tracciabilità superiore, prevenire frodi alimentari con conseguenze gravi per i "
+#              "cittadini, e agevolare le aziende alimentari nella selezione di fornitori e prodotti di qualità "
+#              "superiore.")
+# # egypt_text = "è drammatica la situazione in egitto"
+# sample_embedding = tp.get_text_embedding(meat_text, device, text_tokenizer, text_model)
+# qt.mixed_query(text_collection, graph, meat_text, sample_embedding, {
+#     'gender': 'male',
+#     'timestamp_start': '2010-05-20T18:11:55',
+#     'timestamp_end': '2019-05-20T18:11:55'
+# }, sample_type="text")

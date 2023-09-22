@@ -64,7 +64,7 @@ def create_collections(audio_schema, text_schema):
 def create_indexes_for_collections(audio_collection, text_collection):
     index_structure = {
         "index_type": "IVF_FLAT",
-        "metric_type": "L2",
+        "metric_type": "IP",
         "params": {"nlist": 128},
     }
     audio_collection.create_index("audio_embedding", index_structure)
@@ -88,7 +88,7 @@ def get_collection(collection_name):
 def milvus_similarity_query(collection, sample_embedding, sample_type, limit=16384, ids_filter=None):
     f.my_print("Start searching based on vector similarity")
     search_params = {
-        "metric_type": "L2",
+        "metric_type": "IP",
         "params": {"nprobe": 10},
     }
 

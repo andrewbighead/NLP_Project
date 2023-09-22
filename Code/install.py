@@ -12,6 +12,15 @@ import neo4j_manager as n4m
 import text_processing as tp
 
 
+def normalize_embedding(emb):
+    norm = np.linalg.norm(emb)
+    if norm == 0:
+        return emb
+    else:
+        normalized_arr = emb / norm
+        return normalized_arr
+
+
 def main():
     warnings.filterwarnings("ignore", category=UserWarning, module="torch")
 
@@ -51,8 +60,10 @@ def main():
     for i, item in enumerate(tqdm(dataset, desc="Embedding Estratti", total=len(dataset))):
         intervention_id = item['audio_id']
         processed_embedding_audio = ap.get_audio_embedding(item['audio']['array'], model_audio)
+        processed_embedding_audio = normalize_embedding(processed_embedding_audio)
         audio_embeddings.append({"intervention_id": intervention_id, "audio_embedding": processed_embedding_audio})
         processed_embedding_text = tp.get_text_embedding(item['normalized_text'], device, txt_tokenizer, txt_model)
+        processed_embedding_text = normalize_embedding(processed_embedding_text)
         text_embeddings.append({"intervention_id": intervention_id, "text_embedding": processed_embedding_text})
     f.my_print(f'Estrazione Completata')
 
