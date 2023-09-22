@@ -12,6 +12,7 @@ import neo4j_manager as n4m
 import text_processing as tp
 import normalize as nrm
 
+
 def main():
     warnings.filterwarnings("ignore", category=UserWarning, module="torch")
 
@@ -88,7 +89,7 @@ def main():
     mm.milvus_disconnect()
 
     end_time = time.time() - start_time
-    f.my_print(f'Tempo totale: {end_time/60} minuti.')
+    f.my_print(f'Tempo totale: {end_time / 60} minuti.')
 
     f.my_print(f'Operazioni completate con successo, attendere la terminazione dei processi. Questo potrebbe '
                f'richiedere qualche altro secondo.')
