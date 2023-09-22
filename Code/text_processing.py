@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 import torch
 import numpy as np
+import normalize as nrm
 
 
 def set_text_model(dev):
@@ -57,7 +58,8 @@ def get_text_embedding(text, dev, tokenizer, model):
     indexed_tokens, segments_ids = tokenize_text(text, tokenizer)
     tokens_tensor, segments_tensors = text_to_tensor(indexed_tokens, segments_ids, dev)
     hidden_states = get_hidden_states(dev, model, tokens_tensor, segments_tensors)
-    return np.array(get_sentence_embedding_from_hidden_states(hidden_states))
+    embedding = nrm.normalize_embedding(np.array(get_sentence_embedding_from_hidden_states(hidden_states)))
+    return embedding
 
 
 def create_timestamp_from_audio_id(audio_id):

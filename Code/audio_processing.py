@@ -1,6 +1,7 @@
 import torch
 from speechbrain.pretrained import EncoderClassifier
 import numpy as np
+import normalize as nrm
 
 
 def set_audio_model():
@@ -17,4 +18,5 @@ def get_audio_embedding(audio_arr, model):
     embedding = model.encode_batch(audio_arr).squeeze()
     if torch.cuda.is_available():
         embedding = embedding.to('cpu')
-    return np.array(embedding)
+    embedding = nrm.normalize_embedding(np.array(embedding))
+    return embedding
