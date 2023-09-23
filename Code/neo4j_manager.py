@@ -9,7 +9,7 @@ def py2neo_connect(uri, username, password):
     try:
         f.my_print('Connecting to Neo4J...')
         graph = Graph(uri, auth=(username, password))
-        f.my_print('Neo4J connection established to {uri}!')
+        f.my_print(f'Neo4J connection established to {uri}!')
         return graph
 
     except Exception as e:
