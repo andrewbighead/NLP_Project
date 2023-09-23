@@ -9,7 +9,7 @@ import formatter as f
 
 def set_text_model(dev):
     f.my_print("Loading BERT model for text processing...")
-    f.my_print(f"Selected device for embedding extraction: {dev}")
+    f.my_print(f"Selected device for text embedding extraction: {dev}")
 
     model_name = "dbmdz/bert-base-italian-xxl-uncased"
     tokenizer = BertTokenizer.from_pretrained(model_name)

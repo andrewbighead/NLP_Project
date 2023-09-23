@@ -21,7 +21,7 @@ audio_collection = mm.get_collection("audio_interventions")
 audio_collection.load()
 
 # ------------------------------------- Query on Milvus: text similarity --------------------------------------
-#racist_text = "io non sono razzista ma lo sanno tutti che gli immigrati rubano il nostro lavoro sbarcando qui"
+# racist_text = "io non sono razzista ma lo sanno tutti che gli immigrati rubano il nostro lavoro sbarcando qui"
 # meat_text = ("Egregio Presidente e stimati membri dell'assemblea, la scelta di imporre l'obbligo di etichettare la "
 #             "carne trasformata contenuta negli alimenti di uso comune costituisce un risultato significativo "
 #             "nell'assicurare una tracciabilità superiore, prevenire frodi alimentari con conseguenze gravi per i "
@@ -33,7 +33,6 @@ camion_text = "Inoltre, il regolamento prevede un meccanismo per promuovere la d
               "raggiungere una quota minima obbligatoria di tali veicoli pari al"
 sample_embedding = tp.get_text_embedding(camion_text, device, text_tokenizer, text_model)
 qt.similarity_query(text_collection, graph, camion_text, sample_embedding, sample_type="text")
-
 
 # ------------------------------------- Query on Milvus: audio similarity --------------------------------------
 # audio_text = ("Infatti, se il costo della vita è diverso, la stessa cifra concessa come aiuto può avere un impatto "

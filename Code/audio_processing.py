@@ -10,8 +10,11 @@ def set_audio_model():
     if torch.cuda.is_available():
         encoder = EncoderClassifier.from_hparams(source="speechbrain/lang-id-voxlingua107-ecapa",
                                                  run_opts={"device": "cuda"})
+        dev = "cuda"
     else:
         encoder = EncoderClassifier.from_hparams(source="speechbrain/lang-id-voxlingua107-ecapa")
+        dev = "cpu"
+    f.my_print(f"Selected device for audio embedding extraction: {dev}")
     f.my_print("Model loaded!")
 
     return encoder

@@ -6,6 +6,7 @@ from pymilvus import (
 )
 import formatter as f
 import json
+from tqdm import tqdm
 
 
 def get_milvus_parameter(json_path):
@@ -73,7 +74,9 @@ def create_index_structure():
 
 
 def create_index_collection(collection, vect_attribute, index_structure):
+    f.my_print(f'Creating collections index for {collection.name} ...')
     collection.create_index(vect_attribute, index_structure)
+    f.my_print('Collection index correctly created!')
 
 
 def insert_data_in_collection(data, collection):
@@ -121,3 +124,14 @@ def milvus_similarity_query(collection, sample_embedding, sample_type, limit=163
             }
             retrieved_interventions.append(hit_dict)
     return retrieved_interventions
+
+
+def insert_dataset(audio_collection, dataset, embedding_split, list_of_arrays_audio_embedding_parts,
+                   list_of_arrays_text_embedding_parts, text_collection):
+    f.my_print('Starting data insertion in Milvus...')
+    progress_bar_insert = tqdm(total=len(dataset), desc='Data inserted in Milvus')
+    for i in range(0, embedding_split):
+        insert_data_in_collection(list_of_arrays_audio_embedding_parts[i], audio_collection)
+        insert_data_in_collection(list_of_arrays_text_embedding_parts[i], text_collection)
+        progress_bar_insert.update(len(list_of_arrays_text_embedding_parts[i]))
+    f.my_print('Data correctly inserted!')

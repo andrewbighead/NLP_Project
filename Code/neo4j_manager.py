@@ -1,6 +1,6 @@
 import formatter as f
 from py2neo import Graph, Node, Relationship
-import re
+from tqdm import tqdm
 import text_processing as tp
 import json
 
@@ -84,7 +84,7 @@ def get_text_by_intervention_id_from_neo4j(graph, intervention_id):
     try:
         return result.data()[0]['t.raw_text']
     except IndexError as e:
-        return ''
+        return f'{e}'
 
 
 def get_id_and_text_by_properties_from_neo4j(graph, properties):
@@ -108,3 +108,9 @@ def get_id_and_text_by_properties_from_neo4j(graph, properties):
         retrieved_interventions.append({'id': intervention['i.intervention_id'], 'text': intervention['t.raw_text']})
     return retrieved_interventions
 
+
+def insert_dataset(dataset, n4j_conn):
+    f.my_print('Starting data insertion in Neo4J...')
+    for i, item in enumerate(tqdm(dataset, desc="Data inserted in Neo4J", total=len(dataset))):
+        insert_sample_nodes(n4j_conn, item)
+    f.my_print('Data correctly inserted!')
