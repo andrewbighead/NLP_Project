@@ -7,11 +7,11 @@ import formatter as f
 
 def set_audio_model():
     f.my_print("Loading SpeechBrain model for audio processing...")
-    # if torch.cuda.is_available():
-    #     encoder =  EncoderClassifier.from_hparams(source="speechbrain/lang-id-voxlingua107-ecapa",
-    #                                           run_opts={"device": "cuda"})
-    # else:
-    encoder = EncoderClassifier.from_hparams(source="speechbrain/lang-id-voxlingua107-ecapa")
+    if torch.cuda.is_available():
+        encoder = EncoderClassifier.from_hparams(source="speechbrain/lang-id-voxlingua107-ecapa",
+                                                 run_opts={"device": "cuda"})
+    else:
+        encoder = EncoderClassifier.from_hparams(source="speechbrain/lang-id-voxlingua107-ecapa")
     f.my_print("Model loaded!")
 
     return encoder
