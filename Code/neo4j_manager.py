@@ -79,15 +79,15 @@ def drop_all_nodes(driver):
 
 def get_text_by_intervention_id_from_neo4j(graph, intervention_id):
     query = f"MATCH (t:TextNode)-[:REFERS_TO]->(i:InterventionNode) WHERE i.intervention_id = '{intervention_id}' " \
-            f"RETURN t.raw_text"
+            f"RETURN t.normalized_text"
     result = graph.run(query)
     try:
-        return result.data()[0]['t.raw_text']
+        return result.data()[0]['t.normalized_text']
     except IndexError as e:
         return f'{e}'
 
 
-def get_id_and_text_by_properties_from_neo4j(graph, properties):
+def get_id_and_text_by_properties_from_neo4j(graph, properties, limit=20):
     props_string = " AND ".join([f"i.{key} = ${key}" for key in properties.keys() if "timestamp" not in key])
     if "timestamp_start" in properties.keys():
         props_string = props_string + f" AND datetime(i.timestamp) >= datetime($timestamp_start)"
@@ -96,7 +96,8 @@ def get_id_and_text_by_properties_from_neo4j(graph, properties):
 
     query = (f"MATCH(i:InterventionNode)<-[:REFERS_TO]-(t:TextNode) "
              f"WHERE {props_string} "
-             f"RETURN i.intervention_id, t.raw_text")
+             f"RETURN i.intervention_id, t.normalized_text "
+             f"LIMIT {limit}")
     try:
         result = graph.run(query, **properties)
     except Exception as e:
@@ -105,7 +106,8 @@ def get_id_and_text_by_properties_from_neo4j(graph, properties):
 
     retrieved_interventions = []
     for intervention in result.data():
-        retrieved_interventions.append({'id': intervention['i.intervention_id'], 'text': intervention['t.raw_text']})
+        retrieved_interventions.append({'id': intervention['i.intervention_id'],
+                                        'text': intervention['t.normalized_text']})
     return retrieved_interventions
 
 

@@ -93,7 +93,7 @@ def get_collection(collection_name):
     return Collection(collection_name)
 
 
-def milvus_similarity_query(collection, sample_embedding, sample_type, limit=16384, ids_filter=None):
+def milvus_similarity_query(collection, sample_embedding, sample_type, limit, ids_filter=None):
     search_params = {
         "metric_type": "IP",
         "params": {"nprobe": 10},
