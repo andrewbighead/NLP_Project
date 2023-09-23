@@ -3,14 +3,20 @@ import re
 from datetime import datetime
 import torch
 import numpy as np
-import normalize as nrm
+import normalizer as nrm
+import formatter as f
 
 
 def set_text_model(dev):
+    f.my_print("Loading BERT model for text processing...")
+    f.my_print(f"Selected device for embedding extraction: {dev}")
+
     model_name = "dbmdz/bert-base-italian-xxl-uncased"
     tokenizer = BertTokenizer.from_pretrained(model_name)
     model = BertModel.from_pretrained(model_name, output_hidden_states=True)
     model = model.to(dev)
+    f.my_print("Model loaded!")
+
     return tokenizer, model
 
 

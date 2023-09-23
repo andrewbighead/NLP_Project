@@ -1,16 +1,20 @@
 import torch
 from speechbrain.pretrained import EncoderClassifier
 import numpy as np
-import normalize as nrm
+import normalizer as nrm
+import formatter as f
 
 
 def set_audio_model():
+    f.my_print("Loading SpeechBrain model for audio processing...")
+    # if torch.cuda.is_available():
+    #     encoder =  EncoderClassifier.from_hparams(source="speechbrain/lang-id-voxlingua107-ecapa",
+    #                                           run_opts={"device": "cuda"})
+    # else:
+    encoder = EncoderClassifier.from_hparams(source="speechbrain/lang-id-voxlingua107-ecapa")
+    f.my_print("Model loaded!")
 
-    if torch.cuda.is_available():
-        return EncoderClassifier.from_hparams(source="speechbrain/lang-id-voxlingua107-ecapa",
-                                              run_opts={"device": "cuda"})
-    else:
-        return EncoderClassifier.from_hparams(source="speechbrain/lang-id-voxlingua107-ecapa")
+    return encoder
 
 
 def get_audio_embedding(audio_arr, model):

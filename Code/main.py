@@ -1,13 +1,8 @@
-import torchaudio
 import query_manager as qt
-import numpy as np
 import audio_processing as ap
-import formatter as f
 import milvus_manager as mm
 import neo4j_manager as n4m
-import torch
 import text_processing as tp
-import normalize as nrm
 
 milvus_host, milvus_port = mm.get_milvus_parameter('../config/connect_milvus.json')
 mm.milvus_connect(milvus_host, milvus_port)
@@ -15,7 +10,8 @@ mm.milvus_connect(milvus_host, milvus_port)
 uri, user, pwd = n4m.get_neo4j_parameter('../config/connect_neo4j.json')
 graph = n4m.py2neo_connect(uri, user, pwd)
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+# device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu"
 text_tokenizer, text_model = tp.set_text_model(device)
 audio_model = ap.set_audio_model()
 
@@ -73,3 +69,6 @@ qt.similarity_query(text_collection, graph, camion_text, sample_embedding, sampl
 #     'timestamp_start': '2010-05-20T18:11:55',
 #     'timestamp_end': '2019-05-20T18:11:55'
 # }, sample_type="text")
+
+# ------------------------------------- Exiting application --------------------------------------
+mm.milvus_disconnect()

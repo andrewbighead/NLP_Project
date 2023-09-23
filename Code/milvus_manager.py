@@ -10,35 +10,37 @@ import json
 
 def get_milvus_parameter(json_path):
     try:
-        f.my_print(f"Recupero dei parametri di connessione Milvus")
+        f.my_print(f"Retrieving Milvus connection parameters...")
         with open(json_path) as json_file:
             params = json.load(json_file)
             return params['host'], params['port']
 
     except Exception as e:
-        f.my_print(f"Errore durante il recupero dei parametri di connessione Milvus {e}")
+        f.my_print(f"Error during Milvus connection parameters retrieving: {e}")
         return None
 
 
 def milvus_connect(host, port):
     try:
-        f.my_print('Tentativo di connessione a Milvus')
+        f.my_print('Connecting to Milvus...')
         connections.connect("default", host, port)
-        f.my_print(f'Connesso al database {host}:{port}!')
+        f.my_print(f'Milvus connection established to {host}:{port}!')
         return True
 
     except Exception as e:
-        f.my_print(f"Errore durante la connessione a Milvus {e}")
+        f.my_print(f"Error attempting connection to Milvus: {e}")
         return False
 
 
 def milvus_disconnect():
-    f.my_print("Disconnessione da Milvus")
+    f.my_print("Disconnecting from Milvus...")
     connections.disconnect("default")
-    f.my_print("Disconnesso dal Database Milvus")
+    f.my_print("Disconnected from Milvus.")
 
 
 def create_schemas():
+    f.my_print("Creating Milvus schemas for collections...")
+
     audio_intervention_fields = [
         FieldSchema(name="intervention_id", dtype=DataType.VARCHAR, is_primary=True, auto_id=False, max_length=70),
         FieldSchema(name="audio_embedding", dtype=DataType.FLOAT_VECTOR, dim=256)]
@@ -56,6 +58,7 @@ def create_schemas():
 
 
 def create_collections(audio_schema, text_schema):
+    f.my_print("Creating Milvus collections...")
     audio_collection = Collection("audio_interventions", audio_schema, consistency_level='Strong')
     text_collection = Collection("text_interventions", text_schema, consistency_level="Strong")
     return audio_collection, text_collection
@@ -80,7 +83,7 @@ def insert_data_in_collection(data, collection):
 
 def drop_collection(collection):
     utility.drop_collection(collection.name)
-    f.my_print(f"collection {collection.name} eliminata.")
+    f.my_print(f"Collection {collection.name} deleted.")
 
 
 def get_collection(collection_name):
@@ -88,7 +91,6 @@ def get_collection(collection_name):
 
 
 def milvus_similarity_query(collection, sample_embedding, sample_type, limit=16384, ids_filter=None):
-    f.my_print("Start searching based on vector similarity")
     search_params = {
         "metric_type": "IP",
         "params": {"nprobe": 10},
@@ -110,15 +112,12 @@ def milvus_similarity_query(collection, sample_embedding, sample_type, limit=163
         output_fields=["intervention_id"]
     )
 
-    retrieved_intervention_ids = []
+    retrieved_interventions = []
     for hits in result:
         for hit in hits:
             hit_dict = {
-                "hit": {
-                    "intervention_id": hit.entity.get('intervention_id'),
-                    "distance": hit.distance
-                }
+                "id": hit.entity.get('intervention_id'),
+                "similarity": hit.distance
             }
-            f.my_print(f'{hit_dict}')
-            retrieved_intervention_ids.append(hit.entity.get('intervention_id'))
-    return retrieved_intervention_ids
+            retrieved_interventions.append(hit_dict)
+    return retrieved_interventions
