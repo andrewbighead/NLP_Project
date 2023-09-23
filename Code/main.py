@@ -1,4 +1,4 @@
-import query_manager as qt
+import query_manager as qm
 import audio_processing as ap
 import milvus_manager as mm
 import neo4j_manager as n4m
@@ -32,7 +32,7 @@ camion_text = "Inoltre, il regolamento prevede un meccanismo per promuovere la d
               " basse emissioni, con l'obiettivo di garantire che a partire dal 2025, i costruttori siano tenuti a " \
               "raggiungere una quota minima obbligatoria di tali veicoli pari al"
 sample_embedding = tp.get_text_embedding(camion_text, device, text_tokenizer, text_model)
-qt.similarity_query(text_collection, graph, camion_text, sample_embedding, sample_type="text")
+qm.similarity_query(text_collection, graph, camion_text, sample_embedding, sample_type="text")
 
 # ------------------------------------- Query on Milvus: audio similarity --------------------------------------
 # audio_text = ("Infatti, se il costo della vita è diverso, la stessa cifra concessa come aiuto può avere un impatto "
