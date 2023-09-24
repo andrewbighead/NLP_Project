@@ -25,6 +25,7 @@ audio_collection = mm.get_collection("audio_interventions")
 audio_collection.load()
 
 # ------------------------------------- Query on Milvus: text similarity --------------------------------------
+# racist_text = "io non sono razzista ma lo sanno tutti che gli immigrati rubano il nostro lavoro sbarcando qui"
 # meat_text = ("Egregio Presidente e stimati membri dell'assemblea, la scelta di imporre l'obbligo di etichettare la "
 #              "carne trasformata contenuta negli alimenti di uso comune costituisce un risultato significativo "
 #              "nell'assicurare una tracciabilità superiore, prevenire frodi alimentari con conseguenze gravi per i "
@@ -34,8 +35,9 @@ audio_collection.load()
 # camion_text = "Inoltre, il regolamento prevede un meccanismo per promuovere la diffusione dei camion elettrici e a" \
 #               " basse emissioni, con l'obiettivo di garantire che a partire dal 2025, i costruttori siano tenuti a " \
 #               "raggiungere una quota minima obbligatoria di tali veicoli pari al"
-# input_embedding = tp.get_text_embedding(egypt_text, device, text_tokenizer, text_model)
-# qm.similarity_query(text_collection, graph, input_embedding, egypt_text, input_type="text", limit=5)
+# camion_text = "stimati membri dell'assemblea, sostenibilità alimentare cibo spazzatura hamburger mcdonalds"
+# sample_embedding = tp.get_text_embedding(egypt_text, device, text_tokenizer, text_model)
+# qm.similarity_query(text_collection, graph, egypt_text, sample_embedding, sample_type="text")
 
 # ------------------------------------- Query on Milvus: audio similarity --------------------------------------
 # audio_text = ("Infatti, se il costo della vita è diverso, la stessa cifra concessa come aiuto può avere un impatto "
@@ -49,50 +51,51 @@ audio_collection.load()
 # wave, _ = torchaudio.load(audio_path)
 # audio_arr = wave.numpy()
 # audio_arr = audio_arr[0]
-# input_embedding = ap.get_audio_embedding(audio_arr, audio_model)
-# qm.similarity_query(audio_collection, graph, input_embedding, audio_path, input_type="audio", limit=5)
+# embedding = ap.get_audio_embedding(audio_arr, audio_model)
+# qm.similarity_query(audio_collection, graph, embedding, audio_path, input_type="audio")
 
 # ------------------------------------- Query on Neo4J: properties  --------------------------------------
 # qm.properties_query(graph, {
 #      'gender': 'male',
 #      'timestamp_start': '2010-05-20T18:11:55',
 #      'timestamp_end': '2015-05-20T18:11:55'
-# }, limit=5)
+# })
 
 # ------------------------------------- Mixed Query: properties + text similarity --------------------------------------
+# racist_text = "io non sono razzista ma lo sanno tutti che gli immigrati rubano il nostro lavoro sbarcando qui"
 # meat_text = ("Egregio Presidente e stimati membri dell'assemblea, la scelta di imporre l'obbligo di etichettare la "
 #              "carne trasformata contenuta negli alimenti di uso comune costituisce un risultato significativo "
 #              "nell'assicurare una tracciabilità superiore, prevenire frodi alimentari con conseguenze gravi per i "
 #              "cittadini, e agevolare le aziende alimentari nella selezione di fornitori e prodotti di qualità "
 #              "superiore.")
 # egypt_text = "è drammatica la situazione in egitto"
-# input_embedding = tp.get_text_embedding(egypt_text, device, text_tokenizer, text_model)
-# qm.mixed_query(text_collection, graph, input_embedding, {
+# sample_embedding = tp.get_text_embedding(egypt_text, device, text_tokenizer, text_model)
+# qm.mixed_query(text_collection, graph, sample_embedding, {
 #     'gender': 'male',
 #     'timestamp_start': '2010-05-20T18:11:55',
 #     'timestamp_end': '2015-05-20T18:11:55'
-# }, egypt_text, input_type="text", limit=5)
+# }, sample_type="text", sample_text=egypt_text, limit=20)
 
 
 # ------------------------------------- Mixed Query: properties + audio similarity ------------------------------------
-audio_text = ("Infatti, se il costo della vita è diverso, la stessa cifra concessa come aiuto può avere un impatto "
-              "concreto molto diverso, e non vogliamo generare ulteriori distorsioni nel mercato unico.")
-
+# audio_text = ("Infatti, se il costo della vita è diverso, la stessa cifra concessa come aiuto può avere un impatto "
+#               "concreto molto diverso, e non vogliamo generare ulteriori distorsioni nel mercato unico.")
+#
 audio_path = "../audio_tests/sample.wav"
-audio_path = "../audio_tests/cut_sample.wav"
-audio_path = "../audio_tests/sample_cut_last_second.wav"
-audio_path = "../audio_tests/rec_mario.wav"
-audio_path = "../audio_tests/voce_andrea.wav"
+# audio_path = "../audio_tests/cut_sample.wav"
+# audio_path = "../audio_tests/sample_cut_last_second.wav"
+# audio_path = "../audio_tests/rec_mario.wav"
+# audio_path = "../audio_tests/voce_andrea.wav"
 wave, _ = torchaudio.load(audio_path)
 audio_arr = wave.numpy()
 audio_arr = audio_arr[0]
-input_embedding = ap.get_audio_embedding(audio_arr, audio_model)
+sample_embedding = ap.get_audio_embedding(audio_arr, audio_model)
 
-qm.mixed_query(audio_collection, graph, input_embedding, {
+qm.mixed_query(audio_collection, graph, sample_embedding, {
     'gender': 'male',
     'timestamp_start': '2010-05-20T18:11:55',
     'timestamp_end': '2019-05-20T18:11:55'
-}, audio_path, input_type="audio", limit=5)
+}, audio_path, input_type="audio")
 
 # ------------------------------------- Exiting application --------------------------------------
 mm.milvus_disconnect()
