@@ -56,7 +56,7 @@ def main():
 
     mm.milvus_disconnect()
 
-    # ------------------------------------- Fine -------------------------------------
+    # ------------------------------------- Closing -------------------------------------
 
     end_time = time.time() - start_time
     f.my_print(f'Total time spent: {end_time / 60} minutes.')

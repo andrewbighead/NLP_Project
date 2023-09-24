@@ -3,9 +3,9 @@ import neo4j_manager as n4m
 import milvus_manager as mm
 
 
-def mixed_query(collection, graph, sample_embedding, properties, inpt, input_type, limit=20):
+def mixed_query(collection, graph, input_embedding, properties, input, input_type, limit=20):
     f.my_print("Retrieving interventions by similarity and properties...")
-    f.my_print(f"Query input: {inpt}")
+    f.my_print(f"Query input: {input}")
 
     f.my_print(f"Requested intervention properties: {properties}")
 
@@ -19,7 +19,7 @@ def mixed_query(collection, graph, sample_embedding, properties, inpt, input_typ
 
     # From these interventions, get the most similar from Milvus
     retrieved_similar_interventions = mm.milvus_similarity_query(
-        collection, sample_embedding, input_type, ids_filter=ids_filter, limit=limit)
+        collection, input_embedding, input_type, ids_filter=ids_filter, limit=limit)
 
     # Get the text from the most similar interventions
     i = 0
@@ -31,10 +31,10 @@ def mixed_query(collection, graph, sample_embedding, properties, inpt, input_typ
                            f"Similarity: {similar_intervention['similarity']}")
 
 
-def similarity_query(collection, graph, sample_embedding, inpt, input_type, limit=20):
+def similarity_query(collection, graph, input_embedding, input, input_type, limit=20):
     f.my_print("Retrieving interventions by similarity...")
-    f.my_print(f"Query input: {inpt}")
-    retrieved_interventions = mm.milvus_similarity_query(collection, sample_embedding, input_type, limit)
+    f.my_print(f"Query input: {input}")
+    retrieved_interventions = mm.milvus_similarity_query(collection, input_embedding, input_type, limit)
 
     i = 0
     for retrieved_intervention in retrieved_interventions:
